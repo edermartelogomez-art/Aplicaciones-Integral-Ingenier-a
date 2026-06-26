@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguimiento de Lectura — Clases 9 y 10 · UDI</title>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  chtml: { scale: 1.05 },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --blue:    #005CAA;
+  --blue-dk: #003F78;
+  --blue-lt: #EBF3FC;
+  --blue-md: #B8D4F0;
+  --yellow:  #FFC800;
+  --ylt:     #FFFBEB;
+  --green:   #166534;
+  --glt:     #F0FDF4;
+  --gbd:     #BBF7D0;
+  --red:     #991B1B;
+  --rlt:     #FEF2F2;
+  --rbd:     #FECACA;
+  --ink:     #0F172A;
+  --ink2:    #374151;
+  --ink3:    #6B7280;
+  --line:    #E5E7EB;
+  --bg:      #F8FAFC;
+  --white:   #FFFFFF;
+  --sans:    'Inter', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── PRINT BUTTON (screen only) ── */
+.print-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--blue-dk); padding: 10px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.print-bar span { color: var(--blue-md); font-family: var(--sans); font-size: 13px; }
+.print-btn {
+  background: var(--yellow); color: var(--blue-dk); border: none;
+  padding: 8px 22px; border-radius: 6px; font-family: var(--sans);
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s;
+}
+.print-btn:hover { opacity: .85; }
+
+/* ── PAGE ── */
+body {
+  font-family: var(--sans); background: var(--bg);
+  color: var(--ink); padding-top: 52px;
+}
+.page {
+  max-width: 820px; margin: 24px auto 60px;
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+}
+
+/* ── HEADER ── */
+.doc-header {
+  background: var(--blue); padding: 28px 36px 22px;
+  border-bottom: 5px solid var(--yellow);
+}
+.doc-header-top {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+}
+.logo {
+  width: 42px; height: 42px; background: var(--yellow); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: var(--blue-dk); flex-shrink: 0;
+}
+.doc-header h1 { color: #fff; font-size: 20px; font-weight: 700; line-height: 1.25; }
+.doc-header p  { color: var(--blue-md); font-size: 13px; margin-top: 2px; }
+.meta-row {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 4px;
+}
+.meta-item {
+  background: rgba(255,255,255,.1); border-radius: 7px; padding: 8px 12px;
+}
+.meta-item .lbl { font-size: 10px; font-weight: 600; color: var(--blue-md);
+  text-transform: uppercase; letter-spacing: .06em; }
+.meta-item .val { font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px; }
+
+/* ── STUDENT FIELD ── */
+.student-section {
+  padding: 18px 36px; background: var(--ylt);
+  border-bottom: 1px solid #FDE68A;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-group label { font-size: 11px; font-weight: 700; color: var(--blue);
+  text-transform: uppercase; letter-spacing: .06em; }
+.field-line {
+  border: none; border-bottom: 2px solid var(--blue-md);
+  background: transparent; font-family: var(--sans);
+  font-size: 14px; padding: 4px 2px; color: var(--ink); width: 100%;
+  outline: none; min-height: 28px; display: block;
+}
+.field-line:focus { border-color: var(--blue); }
+.field-line:empty::before { content: attr(data-ph); color: var(--ink3); pointer-events: none; }
+
+/* ── BODY ── */
+.doc-body { padding: 28px 36px; }
+
+/* ── SECTION HEADERS ── */
+.sec-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 28px 0 14px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--blue);
+}
+.sec-header:first-of-type { margin-top: 0; }
+.sec-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sec-header h2 { font-size: 15px; font-weight: 700; color: var(--blue); }
+.sec-tag {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+  text-transform: uppercase; letter-spacing: .07em;
+}
+.tag-comp { background: var(--blue-lt); color: var(--blue); }
+.tag-calc { background: var(--glt); color: var(--green); border: 1px solid var(--gbd); }
+.tag-aplic{ background: var(--rlt); color: var(--red); border: 1px solid var(--rbd); }
+
+/* ── INTRO BOX ── */
+.intro-box {
+  background: var(--blue-lt); border: 1px solid var(--blue-md);
+  border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0;
+  padding: 12px 16px; margin-bottom: 18px; font-size: 13px;
+  color: var(--ink2); line-height: 1.65;
+}
+.intro-box strong { color: var(--blue); }
+
+/* ── FORMULA CARD ── */
+.formula-card {
+  background: var(--blue-dk); border-radius: 8px;
+  padding: 14px 20px; text-align: center; margin: 10px 0;
+  color: #fff; font-size: 1.05em;
+}
+.formula-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;
+}
+.formula-sm {
+  background: var(--blue-lt); border: 1px solid var(--blue-md);
+  border-radius: 7px; padding: 10px 14px; text-align: center; font-size: .95em;
+}
+
+/* ── QUESTION ITEMS ── */
+.q-list { display: flex; flex-direction: column; gap: 16px; }
+.q-item { display: flex; gap: 12px; align-items: flex-start; }
+.q-num {
+  min-width: 26px; height: 26px; border-radius: 50%;
+  background: var(--blue-lt); color: var(--blue);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  margin-top: 1px;
+}
+.q-body { flex: 1; }
+.q-text { font-size: 13.5px; color: var(--ink2); line-height: 1.65; margin-bottom: 6px; }
+.q-text strong { color: var(--ink); }
+
+/* ── ANSWER CHOICES ── */
+.choices { display: flex; flex-direction: column; gap: 5px; padding-left: 2px; }
+.choice {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--ink2); line-height: 1.5;
+}
+.choice-ltr {
+  min-width: 22px; height: 22px; border: 2px solid var(--line);
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--ink3); flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── ANSWER LINE ── */
+.ans-line {
+  border: none; border-bottom: 1.5px solid var(--line);
+  width: 100%; font-family: var(--sans); font-size: 13px;
+  color: var(--ink); padding: 3px 2px; outline: none;
+  background: transparent; margin-top: 4px;
+}
+.ans-line:focus { border-color: var(--blue); }
+.ans-area {
+  border: 1.5px solid var(--line); border-radius: 6px;
+  width: 100%; font-family: var(--sans); font-size: 13px;
+  color: var(--ink); padding: 8px 10px; outline: none;
+  background: transparent; margin-top: 4px; resize: vertical;
+  min-height: 52px;
+}
+.ans-area:focus { border-color: var(--blue); }
+
+/* ── EDITABLE (para celular y teclado) ── */
+.editable {
+  display: block; width: 100%; min-height: 28px;
+  border: none; border-bottom: 1.5px solid var(--line);
+  padding: 4px 2px; font-family: var(--sans); font-size: 13px;
+  color: var(--ink); background: transparent; outline: none;
+  line-height: 1.7;
+}
+.editable:focus { border-color: var(--blue); background: var(--blue-lt); border-radius: 4px 4px 0 0; }
+.editable:empty::before { content: attr(data-ph); color: var(--ink3); pointer-events: none; font-style: italic; }
+
+/* ── WORK BOX ── */
+.work-box {
+  border: 1.5px dashed var(--line); border-radius: 8px;
+  padding: 12px; margin-top: 8px; background: var(--bg);
+}
+.work-box-lbl {
+  font-size: 10px; font-weight: 700; color: var(--ink3);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px;
+}
+/* área de escritura con líneas de fondo */
+.write-area {
+  min-height: 110px; width: 100%;
+  background-image: repeating-linear-gradient(transparent, transparent 28px, var(--line) 28px, var(--line) 29px);
+  background-position: 0 6px;
+  font-family: var(--sans); font-size: 13px; color: var(--ink);
+  line-height: 29px; padding: 6px 4px; outline: none;
+  border: none; caret-color: var(--blue);
+}
+.write-area:empty::before { content: attr(data-ph); color: #CBD5E1; pointer-events: none; font-style: italic; line-height: 1.6; }
+.write-area:focus { background-color: rgba(235,243,252,.4); }
+
+/* ── CONTEXT BANNER ── */
+.ctx {
+  background: var(--ylt); border: 1px solid #FDE68A;
+  border-radius: 7px; padding: 10px 14px;
+  font-size: 13px; color: #78350F; line-height: 1.6;
+  margin-bottom: 10px;
+}
+.ctx strong { color: #92400E; }
+
+/* ── TABLE ── */
+.ref-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12.5px; margin: 10px 0;
+}
+.ref-table th {
+  background: var(--blue); color: #fff;
+  padding: 8px 12px; text-align: left; font-weight: 600;
+}
+.ref-table td {
+  padding: 7px 12px; border-bottom: 1px solid var(--line);
+  color: var(--ink2); vertical-align: middle;
+}
+.ref-table tr:nth-child(even) td { background: var(--blue-lt); }
+
+/* ── DIVIDER ── */
+.divider {
+  border: none; border-top: 2px dashed var(--line);
+  margin: 24px 0;
+}
+
+/* ── SCORE ROW ── */
+.score-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 16px; margin-top: 6px;
+}
+.score-box {
+  border: 2px solid var(--line); border-radius: 7px;
+  padding: 6px 18px; font-size: 13px; font-weight: 600; color: var(--ink3);
+  display: flex; align-items: center; gap: 8px;
+}
+.score-box span { width: 60px; border-bottom: 1.5px solid var(--ink3); display: inline-block; }
+
+/* ── FOOTER ── */
+.doc-footer {
+  background: var(--blue-dk); padding: 14px 36px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.doc-footer p { font-size: 11px; color: var(--blue-md); }
+
+/* ── PRINT STYLES ── */
+@media print {
+  .print-bar { display: none !important; }
+  body { padding-top: 0; background: #fff; }
+  .page {
+    max-width: 100%; margin: 0; border: none;
+    border-radius: 0; box-shadow: none;
+  }
+  .field-line, .ans-line, .ans-area { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .doc-header, .doc-footer, .sec-num, .formula-card, .ref-table th {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .q-item { page-break-inside: avoid; }
+  .sec-header { page-break-after: avoid; }
+  hr.page-break { page-break-before: always; border: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- PRINT BAR (screen only) -->
+<div class="print-bar">
+  <span>Actividad de Seguimiento de Lectura — Clases 9 y 10 · Matemáticas II · UDI</span>
+  <button class="print-btn" onclick="window.print()">⬇ Imprimir / Guardar PDF</button>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <div class="doc-header-top">
+      <div class="logo">UDI</div>
+      <div>
+        <h1>Actividad de Seguimiento de Lectura</h1>
+        <p>Clases 9 y 10 — Matemáticas II · Ingeniería Industrial</p>
+      </div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="lbl">Docente</div>
+        <div class="val">Eder Santiago Martelo Gómez</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">Temas</div>
+        <div class="val">Trabajo · Flujo · Volúmenes</div>
+      </div>
+      <div class="meta-item">
+        <div class="lbl">Valor</div>
+        <div class="val">27 puntos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT DATA -->
+  <div class="student-section">
+    <div class="field-group">
+      <label>Nombre completo</label>
+      <div class="field-line" contenteditable="true" data-ph="Escribe tu nombre..."></div>
+    </div>
+    <div class="field-group">
+      <label>Código estudiantil</label>
+      <div class="field-line" contenteditable="true" data-ph=""></div>
+    </div>
+    <div class="field-group">
+      <label>Fecha</label>
+      <div class="field-line" contenteditable="true" data-ph="dd/mm/aaaa"></div>
+    </div>
+    <div class="field-group">
+      <label>Grupo</label>
+      <div class="field-line" contenteditable="true" data-ph=""></div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="doc-body">
+
+    <div class="intro-box">
+      <strong>Instrucciones:</strong> Esta actividad verifica la comprensión de las lecturas de las Clases 9 y 10.
+      La Parte A contiene preguntas de comprensión conceptual; la Parte B contiene ejercicios de cálculo aplicado.
+      Responde con base en las lecturas. Muestra todo el procedimiento en los ejercicios.
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PARTE A — COMPRENSIÓN DE LECTURA
+    ══════════════════════════════════════ -->
+
+    <!-- A1: CLASE 9 -->
+    <div class="sec-header">
+      <div class="sec-num">A</div>
+      <h2>Parte A — Comprensión de lectura · Clase 9: Trabajo, flujo y producción</h2>
+      <span class="sec-tag tag-comp">Comprensión · 6 pts</span>
+    </div>
+
+    <div class="intro-box">
+      Responde con base en la lectura de la Clase 9. Para las preguntas de selección múltiple, marca con una <strong>X</strong> la opción correcta. Para las preguntas abiertas, escribe en el espacio indicado.
+    </div>
+
+    <div class="q-list">
+
+      <!-- A1 -->
+      <div class="q-item">
+        <div class="q-num">1</div>
+        <div class="q-body">
+          <div class="q-text">Según la lectura, si $r(t)$ es una tasa de producción en unidades/hora, la expresión $\displaystyle\int_a^b r(t)\,dt$ representa:</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>La tasa máxima de producción en el intervalo $[a,b]$.</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>La producción total acumulada entre $t = a$ y $t = b$.</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>La tasa promedio de producción en el intervalo.</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>El costo total de producción en el intervalo.</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A2 -->
+      <div class="q-item">
+        <div class="q-num">2</div>
+        <div class="q-body">
+          <div class="q-text">En la fórmula del <strong>trabajo con fuerza variable</strong>, $W = \displaystyle\int_a^b F(x)\,dx$, si $F(x)$ está en newtons y $x$ en metros, ¿en qué unidades queda $W$?</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>Watts</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>Newton·metro² (N·m²)</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>Joules (J)</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>Metros por segundo</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A3 -->
+      <div class="q-item">
+        <div class="q-num">3</div>
+        <div class="q-body">
+          <div class="q-text">Según la lectura, la fórmula del <strong>balance neto</strong> entre entrada y salida de un fluido es:</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>$\Delta V = \displaystyle\int_a^b q_e(t)\,dt + \int_a^b q_s(t)\,dt$</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>$\Delta V = \displaystyle\int_a^b [q_e(t) - q_s(t)]\,dt$</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>$\Delta V = \displaystyle\int_a^b q_e(t)\,dt \times \int_a^b q_s(t)\,dt$</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>$\Delta V = q_e(b) - q_s(a)$</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A4 -->
+      <div class="q-item">
+        <div class="q-num">4</div>
+        <div class="q-body">
+          <div class="q-text">La lectura menciona la <strong>Ley de Hooke</strong> para resortes: $F(x) = kx$, donde $k$ es la constante del resorte. Según lo leído, ¿qué representa $x$ en esta fórmula?</div>
+          <div class="work-box" style="min-height:60px">
+            <div class="work-box-lbl">Respuesta</div>
+            <div class="editable" contenteditable="true" style="min-height:40px" data-ph="Escribe aquí tu respuesta..."></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A5 -->
+      <div class="q-item">
+        <div class="q-num">5</div>
+        <div class="q-body">
+          <div class="q-text">La fórmula del <strong>valor promedio</strong> de una función $f$ en $[a,b]$ según la lectura es:</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>$f_{\text{prom}} = \displaystyle\int_a^b f(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>$f_{\text{prom}} = (b-a)\displaystyle\int_a^b f(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>$f_{\text{prom}} = \dfrac{1}{b-a}\displaystyle\int_a^b f(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>$f_{\text{prom}} = \dfrac{f(a)+f(b)}{2}$</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A6 — error frecuente -->
+      <div class="q-item">
+        <div class="q-num">6</div>
+        <div class="q-body">
+          <div class="q-text">La lectura advierte sobre un error frecuente al usar el valor promedio. ¿Cuál es ese error según la lectura?</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>Olvidar sumar la constante $C$ al integrar.</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>Usar el valor promedio sin dividir por la longitud del intervalo.</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>Integrar usando variable $x$ en lugar de $t$.</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>Confundir el trabajo con la potencia.</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+    </div><!-- /q-list -->
+
+    <hr class="divider">
+
+    <!-- A2: CLASE 10 -->
+    <div class="sec-header">
+      <div class="sec-num">A</div>
+      <h2>Parte A — Comprensión de lectura · Clase 10: Volúmenes, discos y arandelas</h2>
+      <span class="sec-tag tag-comp">Comprensión · 6 pts</span>
+    </div>
+
+    <div class="q-list">
+
+      <!-- A7 -->
+      <div class="q-item">
+        <div class="q-num">7</div>
+        <div class="q-body">
+          <div class="q-text">Según la lectura de la Clase 10, el volumen como acumulación de secciones transversales se calcula como:</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>$V = A(b) - A(a)$</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>$V = \displaystyle\int_a^b A(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>$V = \pi\displaystyle\int_a^b A(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>$V = [A(x)]_a^b$</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A8 -->
+      <div class="q-item">
+        <div class="q-num">8</div>
+        <div class="q-body">
+          <div class="q-text">En el <strong>método de discos</strong>, cuando la región bajo $y = f(x)$ gira alrededor del eje $x$, el radio de cada disco es $r(x) = f(x)$. ¿Cuál es la fórmula del volumen?</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>$V = \displaystyle\int_a^b f(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>$V = 2\pi\displaystyle\int_a^b f(x)\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>$V = \pi\displaystyle\int_a^b [f(x)]^2\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>$V = \pi\displaystyle\int_a^b f(x)^3\,dx$</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A9 -->
+      <div class="q-item">
+        <div class="q-num">9</div>
+        <div class="q-body">
+          <div class="q-text">¿Cuándo se usa el <strong>método de arandelas</strong> en lugar del método de discos? Explica con tus propias palabras, apoyándote en lo leído.</div>
+          <div class="work-box" style="min-height:72px"><div class="work-box-lbl">Respuesta</div><div class="editable" contenteditable="true" style="min-height:52px" data-ph="Escribe aquí tu respuesta..."></div></div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- A10 -->
+      <div class="q-item">
+        <div class="q-num">10</div>
+        <div class="q-body">
+          <div class="q-text">Según la tabla resumen de la Clase 10, ¿qué fórmula se usa cuando el <strong>radio está expresado en función de $y$</strong> (giro alrededor del eje $y$)?</div>
+          <div class="choices">
+            <div class="choice"><div class="choice-ltr">A</div><span>$V = \pi\displaystyle\int_c^d [f(x)]^2\,dx$</span></div>
+            <div class="choice"><div class="choice-ltr">B</div><span>$V = \pi\displaystyle\int_c^d [x(y)]^2\,dy$</span></div>
+            <div class="choice"><div class="choice-ltr">C</div><span>$V = \displaystyle\int_c^d A(y)\,dy$ sin multiplicar por $\pi$</span></div>
+            <div class="choice"><div class="choice-ltr">D</div><span>$V = \pi\displaystyle\int_c^d y^2\,dx$</span></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+      <!-- A11 -->
+      <div class="q-item">
+        <div class="q-num">11</div>
+        <div class="q-body">
+          <div class="q-text">La lectura lista varios <strong>errores frecuentes</strong> al calcular volúmenes. Escribe <strong>dos</strong> de esos errores tal como los menciona el texto.</div>
+          <div class="work-box">
+            <div class="work-box-lbl">Errores según la lectura</div>
+            <p style="font-size:13px;color:var(--ink3)">1. &nbsp;<input class="ans-line" type="text" style="width:90%" placeholder=""></p>
+            <br>
+            <p style="font-size:13px;color:var(--ink3)">2. &nbsp;<input class="ans-line" type="text" style="width:90%" placeholder=""></p>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 1</div></div>
+        </div>
+      </div>
+
+    </div><!-- /q-list -->
+
+    <hr class="page-break">
+
+    <!-- ══════════════════════════════════════
+         PARTE B — EJERCICIOS DE CÁLCULO
+    ══════════════════════════════════════ -->
+
+    <!-- Tabla de referencia -->
+    <div class="sec-header" style="margin-top:0">
+      <div class="sec-num">B</div>
+      <h2>Parte B — Ejercicios de cálculo aplicado</h2>
+      <span class="sec-tag tag-calc">Cálculo · 9 pts</span>
+    </div>
+
+    <div class="intro-box">
+      Resuelve los siguientes ejercicios mostrando <strong>todo el procedimiento</strong>: planteamiento de la integral, antiderivada, evaluación e interpretación. Usa los espacios de trabajo provistos.
+    </div>
+
+    <table class="ref-table" style="margin-bottom:18px">
+      <tr>
+        <th>Situación</th><th>Integral</th><th>Resultado</th>
+      </tr>
+      <tr>
+        <td>Producción / flujo acumulado</td>
+        <td>$\displaystyle\int_a^b r(t)\,dt$</td>
+        <td>Cantidad acumulada</td>
+      </tr>
+      <tr>
+        <td>Trabajo (fuerza variable)</td>
+        <td>$\displaystyle\int_a^b F(x)\,dx$</td>
+        <td>Joules</td>
+      </tr>
+      <tr>
+        <td>Valor promedio</td>
+        <td>$\dfrac{1}{b-a}\displaystyle\int_a^b f(x)\,dx$</td>
+        <td>Promedio</td>
+      </tr>
+      <tr>
+        <td>Discos (sin hueco)</td>
+        <td>$\pi\displaystyle\int_a^b [f(x)]^2\,dx$</td>
+        <td>Unidades³</td>
+      </tr>
+      <tr>
+        <td>Arandelas (con hueco)</td>
+        <td>$\pi\displaystyle\int_a^b \bigl[R(x)^2 - r(x)^2\bigr]\,dx$</td>
+        <td>Unidades³</td>
+      </tr>
+    </table>
+
+    <div class="q-list">
+
+      <!-- B1 -->
+      <div class="q-item">
+        <div class="q-num">B1</div>
+        <div class="q-body">
+          <div class="ctx"><strong>Producción acumulada:</strong> Una línea de ensamble tiene tasa de producción $r(t) = 90 + 12t$ unidades/hora. Calcula la producción total durante las primeras <strong>6 horas</strong>.</div>
+          <div class="q-text">Plantea y resuelve la integral. Interpreta el resultado.</div>
+          <div class="work-box">
+            <div class="work-box-lbl">Procedimiento — escribe aquí tu desarrollo</div>
+            <div class="write-area" contenteditable="true" data-ph="Paso 1: Planteamiento de la integral...&#10;Paso 2: Antiderivada...&#10;Paso 3: Evaluación..."></div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap">Interpretación:</span>
+            <div class="editable" contenteditable="true" data-ph="¿Qué significa el resultado en este proceso?"></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- B2 -->
+      <div class="q-item">
+        <div class="q-num">B2</div>
+        <div class="q-body">
+          <div class="ctx"><strong>Balance neto:</strong> A un depósito de almacenamiento entra fluido a razón $q_e(t) = 60 + 3t$ litros/min y sale a razón $q_s(t) = 20 + t$ litros/min. Calcula el <strong>cambio neto</strong> de volumen entre $t = 0$ y $t = 5$ minutos.</div>
+          <div class="work-box">
+            <div class="work-box-lbl">Procedimiento — escribe aquí tu desarrollo</div>
+            <div class="write-area" contenteditable="true" data-ph="Paso 1: Diferencia de tasas...&#10;Paso 2: Antiderivada...&#10;Paso 3: Evaluación..."></div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap">Interpretación:</span>
+            <div class="editable" contenteditable="true" data-ph="¿Qué indica el resultado sobre el nivel del depósito?"></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- B3 -->
+      <div class="q-item">
+        <div class="q-num">B3</div>
+        <div class="q-body">
+          <div class="ctx"><strong>Método de discos:</strong> La región bajo la curva $y = \sqrt{2x}$, para $0 \leq x \leq 6$, gira alrededor del eje $x$. Calcula el volumen del sólido generado.</div>
+          <div class="formula-sm" style="margin-bottom:8px">$$V = \pi\int_0^6 \bigl(\sqrt{2x}\bigr)^2\,dx = \pi\int_0^6 2x\,dx$$</div>
+          <div class="work-box">
+            <div class="work-box-lbl">Procedimiento — escribe aquí tu desarrollo</div>
+            <div class="write-area" contenteditable="true" data-ph="Antiderivada de 2x...&#10;Evaluación en [0, 6]...&#10;Resultado final multiplicado por pi..."></div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap">Resultado:</span>
+            <div class="editable" contenteditable="true" data-ph="V = ___ unidades cúbicas"></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- B4 -->
+      <div class="q-item">
+        <div class="q-num">B4</div>
+        <div class="q-body">
+          <div class="ctx"><strong>Método de arandelas — pieza industrial:</strong> Una pieza de revolución tiene radio externo $R(x) = 2 + x$ y radio interno $r(x) = 1$, para $0 \leq x \leq 4$. Calcula el volumen de material de la pieza.</div>
+          <div class="work-box">
+            <div class="work-box-lbl">Procedimiento — escribe aquí tu desarrollo</div>
+            <div class="write-area" contenteditable="true" style="min-height:130px" data-ph="Paso 1: R(x)² - r(x)² = ...&#10;Paso 2: Expandir y simplificar...&#10;Paso 3: Antiderivada...&#10;Paso 4: Evaluación en [0, 4]..."></div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap">Volumen de material:</span>
+            <div class="editable" contenteditable="true" data-ph="V = ___ unidades cúbicas"></div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 3</div></div>
+        </div>
+      </div>
+
+    </div><!-- /q-list -->
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════
+         PARTE C — REFLEXIÓN
+    ══════════════════════════════════════ -->
+    <div class="sec-header">
+      <div class="sec-num">C</div>
+      <h2>Parte C — Conexión y reflexión</h2>
+      <span class="sec-tag tag-aplic">Reflexión · 6 pts</span>
+    </div>
+
+    <div class="q-list">
+
+      <!-- C1 -->
+      <div class="q-item">
+        <div class="q-num">C1</div>
+        <div class="q-body">
+          <div class="q-text">Las lecturas de las Clases 9 y 10 comparten una <strong>idea central</strong>. En una oración, ¿cuál es esa idea y cómo conecta las dos clases?</div>
+          <div class="work-box" style="min-height:72px"><div class="work-box-lbl">Respuesta</div><div class="editable" contenteditable="true" style="min-height:52px" data-ph="Escribe aquí tu respuesta..."></div></div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- C2 -->
+      <div class="q-item">
+        <div class="q-num">C2</div>
+        <div class="q-body">
+          <div class="q-text">Describe <strong>una situación real</strong> de Ingeniería Industrial donde usarías el método de discos o arandelas para estimar el volumen de un componente o recipiente. Sé específico con el contexto.</div>
+          <div class="work-box" style="min-height:88px"><div class="work-box-lbl">Situación real propuesta</div><div class="editable" contenteditable="true" style="min-height:64px" data-ph="Describe la situación con el contexto específico..."></div></div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+      <!-- C3 -->
+      <div class="q-item">
+        <div class="q-num">C3</div>
+        <div class="q-body">
+          <div class="q-text">Con base en las dos lecturas, responde cada pregunta en tus propias palabras:</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:6px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:4px">¿Qué tipo de situación industrial se modela con la integral de una tasa r(t)?</div>
+              <div class="editable" contenteditable="true" data-ph="Escribe tu respuesta..."></div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:4px">¿Cuál es la diferencia práctica entre usar el método de discos y el método de arandelas en una pieza industrial?</div>
+              <div class="editable" contenteditable="true" style="min-height:44px" data-ph="Escribe tu respuesta..."></div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:4px">¿En qué se parece calcular producción acumulada y calcular un volumen de revolución? ¿Qué tienen en común?</div>
+              <div class="editable" contenteditable="true" style="min-height:44px" data-ph="Escribe tu respuesta..."></div>
+            </div>
+          </div>
+          <div class="score-row"><div class="score-box">Pts: <span></span> / 2</div></div>
+        </div>
+      </div>
+
+    </div><!-- /q-list -->
+
+    <hr class="divider">
+
+    <!-- TOTAL -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em">Distribución</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:4px">Parte A: 12 pts &nbsp;·&nbsp; Parte B: 9 pts &nbsp;·&nbsp; Parte C: 6 pts</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:14px;font-weight:700;color:var(--blue)">TOTAL</div>
+        <div style="border:2px solid var(--blue);border-radius:8px;padding:8px 24px;font-size:18px;font-weight:700;color:var(--blue);min-width:90px;text-align:center">
+          <span style="border-bottom:2px solid var(--blue-md);display:inline-block;width:40px">&nbsp;</span> / 27
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /doc-body -->
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <p>Universidad de Investigación y Desarrollo — UDI · Matemáticas II · Ingeniería Industrial</p>
+    <p>Docente: Eder Santiago Martelo Gómez</p>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── Selección múltiple interactiva ──
+document.querySelectorAll('.choices').forEach(group => {
+  group.querySelectorAll('.choice').forEach(choice => {
+    choice.style.cursor = 'pointer';
+    choice.addEventListener('click', () => {
+      group.querySelectorAll('.choice').forEach(c => {
+        c.classList.remove('selected');
+        c.querySelector('.choice-ltr').style.background = '';
+        c.querySelector('.choice-ltr').style.borderColor = '';
+        c.querySelector('.choice-ltr').style.color = '';
+      });
+      choice.classList.add('selected');
+      const ltr = choice.querySelector('.choice-ltr');
+      ltr.style.background = 'var(--blue)';
+      ltr.style.borderColor = 'var(--blue)';
+      ltr.style.color = '#fff';
+    });
+  });
+});
+
+// ── Ocultar barra antes de imprimir ──
+window.addEventListener('beforeprint', () => {
+  document.querySelector('.print-bar').style.display = 'none';
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector('.print-bar').style.display = 'flex';
+});
+
+// ── MathJax ──
+window.addEventListener('load', () => {
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
